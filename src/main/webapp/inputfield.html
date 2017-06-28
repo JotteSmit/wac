@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<textarea id="localstorage"></textarea>
+
+<script src="https://code.jquery.com/jquery-3.2.0.min.js"></script>
+<script>$(document).ready(function() {
+	$("#localstorage").keyup(function() {
+		localStorage.setItem("textfield", $("#localstorage").val());
+	});
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script
+	src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<style>
+.mainTable {
+	width: 100%;
+	text-align: left;
+}
+
+.mainTable tr:hover {
+	background-color: lightgray;
+	cursor: pointer;
+}
+
+.searchblk {
+	background-color: lightgray;
+	width: 100%;
+	font-color: white;
+}
+
+</style>
+</head>
+<body onload="loadCountries()">
+	<div class="search">
+		<form>
+			<input type="text" class="searchblk" id="myInput"
+				onkeyup="filterCountries()" placeholder="Search for names..">
+		</form>
+	</div>
+	<form id="countryForm">
+		<input type="text" placeholder="code3" id="code3" name="code3" /> <input
+			type="text" placeholder="name" id="name" name="name" /> <input
+			type="text" placeholder="continent" id="continent" name="continent" />
+		<input type="text" placeholder="region" id="region" name="region" />
+		<input type="text" placeholder="surfacearea" id="surfacearea"
+			name="surfaceaerea" /> <input type="text" placeholder="population"
+			id="population" name="population" /> <input type="text"
+			placeholder="governmentform" id="governmentform"
+			name="governmentform" /> <input type="text" placeholder="code2"
+			id="code2" name="code2" /> <input type="text" placeholder="latitude"
+			id="latitude" name="latitude" /> <input type="text"
+			placeholder="longitude" id="longitude" name="longitude" /> <input
+			type="text" placeholder="capital" id="capital" name="capital" /> <input
+			type="button" id="post" value="ADD" onClick="addCountry()" /> <input
+			type="button" id="put" value="ALTER" onCLick="alterCountry()" />
+	</form>
+	<div class="tablewrapper">
+		<table id="#tableContainer" class="mainTable"></table>
+	</div>
+
+	<script>
+	function loadCountries(){
+   	 $.getJSON("http://localhost:8082/firstapp/restservices/countries", function(countriesData){
+   		 
+   		 var table = '<table class="mainTable"><tr> <th>Land</th> <th>Hoofdstad</th> <th>Regio</th> <th>Oppervlakte</th> <th>Inwoners</th> <th>Code</th> <th>Delete<th> </tr>';
+
+            $.each(countriesData, function (key, value) {
+           	 var stad = value.capital;
+           	 var long = value.lng;
+           	 var lat = value.lat;
+           	 var city = value.name;
+           	 var code = value.code;
+           	 var string = lat+','+long+',\''+stad+'\'';
+         	   table += ('<a><td onClick="selectCountry(\''+ value.code+'\')">' + value.name + '</td></a>');
+                table += ('<a><td onClick="selectCountry(\''+ value.code+'\')">' + value.capital + '</td></a>');
+                table += ('<a><td onClick="selectCountry(\''+ value.code+'\')">' + value.region + '</td></a>');
+                table += ('<a><td onClick="selectCountry(\''+ value.code+'\')">' + value.surface + '</td></a>');
+                table += ('<a><td onClick="selectCountry(\''+ value.code+'\')">' + value.population + '</td></a>');
+                table += ('<a><td onClick="selectCountry(\''+ value.code+'\')">' + value.code + '</td>');
+                table += ('<td> <input type="button" id="delete" onClick="deleteCountry(\'' + value.code + '\')" value="Delete"/>');
+                 table += ('</tr>');
+                 
+           });
+      table += '</table>';
+     document.getElementById("#tableContainer").innerHTML = table;  
+   	 })};	
+   	function filterCountries() {
+        // Declare variables
+        var input, filter, table, tr, td, i;
+        input = document.getElementById("myInput");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("#tableContainer");
+        tr = table.getElementsByTagName("tr");
+
+       // Loop through all table rows, and hide those who don't
+          // match the search query
+        for (i = 0; i < tr.length; i++) {
+          td = tr[i].getElementsByTagName("td")[0];
+          if (td) {
+            if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
+              tr[i].style.display = "";
+            } else {
+              tr[i].style.display = "none";
+            }
+          }
+        }
+      }
+   	function deleteCountry(code) {
+   		$.ajax({
+   			url: "http://localhost:8082/firstapp/restservices/countries/delete/" + code,
+   			method: "delete",
+   			beforeSend: function (xhr) {
+   			var token = window.sessionStorage.getItem("sessionToken");
+   			xhr.setRequestHeader( 'Authorization', 'Bearer ' + token);
+   			},
+   			success: function(response) {
+   		   		console.log("succes");
+   		   		loadCountries();
+   		   		},
+   		   		error: function(response) {
+   		   		console.log("failure");
+   		   		}
+   		   		});
+   		   		}
+   	
+   function addCountry(){
+	   var data = { "code3": $("#code3").val(), "name": $("#name").val(), "continent": $("#continent").val(), "region": $("#region").val(), 
+			   "surfacearea": $("#surfacearea").val(), "population": $("#population").val(), "governmentform": $("#governmentform").val(), 
+			   "code2": $("#code2").val(), "latitude": $("#latitude").val(), "longitude": $("#longitude").val(), "capital": $("#capital").val() }
+	   
+	   
+	   var JSONdata = JSON.stringify(data);
+	   console.log(JSONdata);
+	   
+	   $.ajax({
+  			url: "http://localhost:8082/firstapp/restservices/countries/addCountry",
+  			method: "post",
+  			beforeSend: function (xhr) {
+  			var token = window.sessionStorage.getItem("sessionToken");
+  			xhr.setRequestHeader( 'Authorization', 'Bearer ' + token);
+  			}, 
+  			data: JSONdata,
+  			success: function(response){
+  				console.log((JSON.stringify(response)));
+  			   loadCountries();}
+  			});
+	   }
+   	
+   
+   function selectCountry(code){
+	   $.getJSON("http://localhost:8082/firstapp/restservices/countries/" +code, function(data){
+	   console.log(data);
+		var name = data.name;
+	   	var capital = data.capital;
+	   	var code2 = data.code;
+	   	var government = data.government;
+	   	var latitude = data.lat;
+	   	var longitude = data.lon;
+	   	var code3 = data.iso3;
+	   	var population = data.population;
+	   	var region = data.region;
+	   	var surface = data.surface;
+	   	var continent = data.continent;
+	   	
+	   	document.getElementById("code3").value = code3;
+	   	document.getElementById("name").value = name;
+	   	document.getElementById("continent").value = continent;
+	   	document.getElementById("region").value = region;
+	   	document.getElementById("surfacearea").value = surface;
+	   	document.getElementById("population").value = population;
+	   	document.getElementById("governmentform").value = government;
+	   	document.getElementById("code2").value = code2;
+	   	document.getElementById("latitude").value = latitude;
+	   	document.getElementById("longitude").value = longitude;
+	   	document.getElementById("capital").value = capital;
+   });}
+   
+   function alterCountry(){
+	   var uri = "http://localhost:8082/firstapp/restservices/countries/" + document.getElementById("code3").value;
+	   var data = { "code3": $("#code3").val(), "name": $("#name").val(), "continent": $("#continent").val(), "region": $("#region").val(), 
+			   "surfacearea": $("#surfacearea").val(), "population": $("#population").val(), "governmentform": $("#governmentform").val(), 
+			   "code2": $("#code2").val(), "latitude": $("#latitude").val(), "longitude": $("#longitude").val(), "capital": $("#capital").val() }
+	   var JSONdata = JSON.stringify(data);
+	   
+	   $.ajax({
+			url: uri,
+			method: "PUT",
+			contentYpe: "application/json",
+			beforeSend: function (xhr) {
+			var token = window.sessionStorage.getItem("sessionToken");
+			xhr.setRequestHeader( 'Authorization', 'Bearer ' + token);
+			}, data: JSONdata,
+			success: function(response) {
+			   console.log("succes");
+			   console.log(response);
+			   loadCountries();
+		   },
+		   error: function(response) {
+		   console.log("failure");
+		   console.log(response);
+		   }
+		   }); 
+   }
+	</script>
+</body>
+</html>

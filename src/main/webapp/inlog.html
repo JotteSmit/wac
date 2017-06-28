@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Inloggen</title>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+</head>
+<body>
+<div id="response"></div>
+
+<h1>Inloggen</h1>
+<form id="login">
+	<div>
+    	<label for="weekbedag">Username</label>
+		<input type="text" placeholder="Username" id="username" name="username" required="required">
+  	</div>
+  	<div>
+  		<label for="wachtwoord">Wachtwoord</label>
+  		<input type="password" placeholder="Wachtwoord" id="password" name="password" required="required">
+  	</div>
+		<input type="submit" id="inloggen" value="Inloggen" required="required" class="btn btn-primary">
+</form>
+
+
+</body>
+<script>
+$('form#login').on('submit', function(e) {
+	e.preventDefault();
+	var data = $("#login").serialize();
+	
+	$.post("http://localhost:8082/firstapp/restservices/authentication", data, function(response) {
+		window.sessionStorage.setItem("sessionToken", response);
+		window.location.href = "http://localhost:8082/firstapp/beherenlandeninfo.html";
+	});
+});
+</script>
+</html>

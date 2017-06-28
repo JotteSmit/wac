@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" type="text/css" href="style.css">
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"> </script>
+<title>Insert title here</title>
+<style>
+@media screen and (min-width: 750px) {
+	.container{
+		display: grid;
+		grid-template-columns: auto auto;
+		grid-template-rows: auto;
+	}
+	.frame{
+		grid-column-start: 1;
+		grid-row-start:1;
+		
+	}
+	.weatherInfo{
+		grid-column-start: 2;
+		grid-row-start:1;
+	}
+}
+</style>
+</head>
+<body onload="initPage()">
+<div class="container">
+	<div class="frame">
+		<h2>
+			<div id="myLocation" onClick="initPage()" style="cursor: pointer"></div>
+				Mijn locatie<br>
+		</h2>
+
+		Landcode:<label id="labellc"></label><br> Land:<label
+			id="labelland"></label><br> Regio:<label id="labelreg"></label><br>
+		Stad:<label id="labelstad"></label><br> Postcode:<label
+			id="labelpc"></label><br> Latitude:<label id="labelLat"></label><br>
+		Longitude:<label id="labelLong"></label><br> IP:<label
+			id="labelIP"></label>
+	</div>
+	
+	<div class="weatherInfo">
+		<h2>
+			Het weer in <label id="labelstad1"></label><br>
+		</h2>
+		Temperatuur:
+		<label id="temp"></label>
+		<br> Luchtvochtigheid:
+		<label id="lv"></label>
+		<br> Windsnelheid:
+		<label id="ws"></label>
+		<br> Windrichting:
+		<label id="wr"></label>
+		<br> Zonsopgang:
+		<label id="zonsop"></label>
+		<br> Zonsondergang:
+		<label id="zonson"></label>
+		<br>
+	</div>
+</div>	
+	<div class="countryList">
+		<h2>
+		Beschikbare vakantiebestemmingen
+		</h2>
+		<div style="overflow-x:auto;"> 
+			<table id="#tableContainer" class="mainTable" ></table>
+		</div>
+	</div>
+	<script type="text/javascript">
+	function initPage(){
+        $.getJSON("http://ip-api.com/json", function(data) {
+            var land = data.country;
+            var landcode = data.countryCode;
+            var regio = data.regionName;
+            var stad = data.city;
+            var pc = data.zip;
+            var lat = data.lat;
+            var long = data.lon;
+            var ip = data.query;
+            
+            
+            document.getElementById("labelland").innerHTML = land;
+            document.getElementById("labellc").innerHTML = landcode;
+            document.getElementById("labelreg").innerHTML = regio;
+            document.getElementById("labelstad").innerHTML = stad;
+            document.getElementById("labelpc").innerHTML = pc;
+            document.getElementById("labelLat").innerHTML = lat;
+            document.getElementById("labelLong").innerHTML = long;
+            document.getElementById("labelIP").innerHTML = ip;
+            
+            showWeather(lat,long,stad);
+            loadCountries();
+            })};
+            function showWeather(lat, lon, city){
+                	var tenminutes = Date.now() + 600000;
+                	if(localStorage.place != lat+lon || localStorage.time > tenminutes){
+                		$.getJSON("http://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lon + "&units=metric&appid=0203744c8863e669933fc94c9dff1bf7", function(weatherData){
+                		var temp = weatherData.main.temp;
+                        var lv = weatherData.main.humidity;
+                        var ws = weatherData.wind.speed;
+                        var wr = weatherData.wind.deg;
+                        
+                        var date = new Date(weatherData.sys.sunrise*1000);
+                        var hours = date.getHours();
+                        var minutes = "0" + date.getMinutes();
+                        var seconds = "0" + date.getSeconds();
+                        var formattedTime = hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
+                        
+                        var date1 = new Date(weatherData.sys.sunset*1000);
+                        var hours1 = date1.getHours();
+                        var minutes1 = "0" + date1.getMinutes();
+                        var seconds1 = "0" + date1.getSeconds();
+                        var formattedTime1 = hours1 + ':' + minutes1.substr(-2) + ':' + seconds1.substr(-2);
+                       
+                        localStorage.time = Date.now();
+                        localStorage.place = lat + lon;
+                        localStorage.temp = temp;
+                        localStorage.lv = lv;
+                        localStorage.ws = ws;
+                        localStorage.wr = wr;
+                        localStorage.zonsop = formattedTime;
+                        localStorage.zonson = formattedTime1;
+                        
+                        document.getElementById("temp").innerHTML = temp;
+                        document.getElementById("lv").innerHTML = lv;
+                        document.getElementById("ws").innerHTML = ws;
+                        document.getElementById("wr").innerHTML = wr;
+                        document.getElementById("zonsop").innerHTML = formattedTime;
+                        document.getElementById("zonson").innerHTML = formattedTime1;
+                        document.getElementById("labelstad1").innerHTML = city;
+                        console.log("if");
+
+                		})} else if (localStorage.getItem("time") < tenminutes || localStorage.getItem("place") == lat+lon){
+                		document.getElementById("temp").innerHTML = localStorage.temp;
+                        document.getElementById("lv").innerHTML = localStorage.lv;
+                        document.getElementById("ws").innerHTML = localStorage.ws;
+                        document.getElementById("wr").innerHTML = localStorage.wr;
+                        document.getElementById("labelstad1").innerHTML = city;
+                        document.getElementById("zonsop").innerHTML = localStorage.zonsop;
+                        document.getElementById("zonson").innerHTML = localStorage.zonson;
+                        console.log("else");
+                       
+                	}                  
+                };
+            function loadCountries(){
+            	 $.getJSON("http://localhost:8082/firstapp/restservices/countries", function(countriesData){
+            		 
+            		 var table = '<table class="mainTable"><tr> <th>Land</th> <th>Hoofdstad</th> <th>Regio</th> <th>Oppervlakte</th> <th>Inwoners</th> </tr>';
+
+                     $.each(countriesData, function (key, value) {
+                    	 var stad = value.capital;
+                    	 var lon = value.lng;
+                    	 var lat = value.lat;
+                    	 var city = value.name;
+                    	 var string = lat+','+lon+',\''+stad+'\'';
+                  	   table += ('<a><td onClick="showWeather('+string+')">' + value.name + '</td></a>');
+                         table += ('<td>' + value.capital + '</td>');
+                         table += ('<td>' + value.region + '</td>');
+                         table += ('<td>' + value.surface + '</td>');
+                         table += ('<td>' + value.population + '</td>');
+                          table += ('</tr>');
+                          
+                    });
+               table += '</table>';
+              document.getElementById("#tableContainer").innerHTML = table;  
+             
+            	 })};
+      
+        </script>
+</body>
+</html>
