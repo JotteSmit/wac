@@ -54,7 +54,7 @@
 
 	<script>
 	function loadCountries(){
-   	 $.getJSON("http://localhost:8082/firstapp/restservices/countries", function(countriesData){
+   	 $.getJSON("/restservices/countries", function(countriesData){
    		 
    		 var table = '<table class="mainTable"><tr> <th>Land</th> <th>Hoofdstad</th> <th>Regio</th> <th>Oppervlakte</th> <th>Inwoners</th> <th>Code</th> <th>Delete<th> </tr>';
 
@@ -101,7 +101,7 @@
       }
    	function deleteCountry(code) {
    		$.ajax({
-   			url: "http://localhost:8082/firstapp/restservices/countries/delete/" + code,
+   			url: "/restservices/countries/delete/" + code,
    			method: "delete",
    			beforeSend: function (xhr) {
    			var token = window.sessionStorage.getItem("sessionToken");
@@ -127,7 +127,7 @@
 	   console.log(JSONdata);
 	   
 	   $.ajax({
-  			url: "http://localhost:8082/firstapp/restservices/countries/addCountry",
+  			url: "/restservices/countries/addCountry",
   			method: "post",
   			beforeSend: function (xhr) {
   			var token = window.sessionStorage.getItem("sessionToken");
@@ -142,7 +142,7 @@
    	
    
    function selectCountry(code){
-	   $.getJSON("http://localhost:8082/firstapp/restservices/countries/" +code, function(data){
+	   $.getJSON("/restservices/countries/" +code, function(data){
 	   console.log(data);
 		var name = data.name;
 	   	var capital = data.capital;
@@ -170,7 +170,7 @@
    });}
    
    function alterCountry(){
-	   var uri = "http://localhost:8082/firstapp/restservices/countries/" + document.getElementById("code3").value;
+	   var uri = "/restservices/countries/" + document.getElementById("code3").value;
 	   var data = { "code3": $("#code3").val(), "name": $("#name").val(), "continent": $("#continent").val(), "region": $("#region").val(), 
 			   "surfacearea": $("#surfacearea").val(), "population": $("#population").val(), "governmentform": $("#governmentform").val(), 
 			   "code2": $("#code2").val(), "latitude": $("#latitude").val(), "longitude": $("#longitude").val(), "capital": $("#capital").val() }

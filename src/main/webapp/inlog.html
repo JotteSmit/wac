@@ -28,9 +28,9 @@ $('form#login').on('submit', function(e) {
 	e.preventDefault();
 	var data = $("#login").serialize();
 	
-	$.post("http://localhost:8082/firstapp/restservices/authentication", data, function(response) {
+	$.post("/restservices/authentication", data, function(response) {
 		window.sessionStorage.setItem("sessionToken", response);
-		window.location.href = "http://localhost:8082/firstapp/beherenlandeninfo.html";
+		window.location.href = "/beherenlandeninfo.html";
 	});
 });
 </script>

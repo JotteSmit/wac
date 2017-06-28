@@ -145,7 +145,7 @@
                 	}                  
                 };
             function loadCountries(){
-            	 $.getJSON("http://localhost:8082/firstapp/restservices/countries", function(countriesData){
+            	 $.getJSON("/restservices/countries", function(countriesData){
             		 
             		 var table = '<table class="mainTable"><tr> <th>Land</th> <th>Hoofdstad</th> <th>Regio</th> <th>Oppervlakte</th> <th>Inwoners</th> </tr>';
 
